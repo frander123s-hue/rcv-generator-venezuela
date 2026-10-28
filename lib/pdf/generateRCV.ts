@@ -415,9 +415,9 @@ export async function generateRCVPdf(
     size: 7.5,
     font: fontBold,
   })
-  const advisorSupervisorText = `ASESOR: ${(policy.advisor || 'OFICINA').substring(0, 15)}   SUPERVISOR: ${(policy.supervisor || 'GERENCIA').substring(0, 15)}`
+  const advisorSupervisorText = `ASESOR: ${(policy.advisor || 'OFICINA PRINCIPAL').substring(0, 22)}   SUPERVISOR: ${(policy.supervisor || 'GERENCIA GENERAL').substring(0, 22)}`
   page1.drawText(advisorSupervisorText, {
-    x: margin + 170,
+    x: margin + 140,
     y: curY + 3.5,
     size: 6.5,
     font: fontBold,
@@ -680,7 +680,7 @@ export async function generateRCVPdf(
   })
 
   curY -= 12
-  page1.drawText('Beneficio', { x: margin + 8, y: curY + 2, size: 7.5, font: fontBold })
+  page1.drawText('Beneficios', { x: margin + 8, y: curY + 2, size: 7.5, font: fontBold })
   page1.drawText('Cobertura', { x: pageWidth - margin - 80, y: curY + 2, size: 7.5, font: fontBold })
 
   const covMap: Record<string, number> = {}
