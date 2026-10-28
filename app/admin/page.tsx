@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { listAllPolicies, listAllClients, isSupabaseConfigured } from '@/lib/db/store'
+import QuickResendEmailButton from '@/components/admin/QuickResendEmailButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -192,6 +193,10 @@ export default async function AdminDashboardPage() {
                         >
                           📱 QR
                         </Link>
+                        <QuickResendEmailButton
+                          policyId={policy.id}
+                          clientEmail={policy.clients?.email}
+                        />
                       </div>
                     </td>
                   </tr>

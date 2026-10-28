@@ -961,24 +961,6 @@ export async function generateRCVPdf(
       })
     }
 
-    // Mini foto del cliente si fue cargada
-    if (clientPhotoImg && idx === 0) {
-      page1.drawImage(clientPhotoImg, {
-        x: cX + cardWidth - 102,
-        y: cardY + 50,
-        width: 34,
-        height: 44,
-      })
-      page1.drawRectangle({
-        x: cX + cardWidth - 102,
-        y: cardY + 50,
-        width: 34,
-        height: 44,
-        borderColor: BORDER_GRAY,
-        borderWidth: 0.4,
-      })
-    }
-
     // Zona inferior de cada carnet (Firmas + Sello PAGADO)
     if (idx === 0) {
       // Carnet Izquierdo: Sello PAGADO (docshape14: left=2662, top=2432, width=49pt, height=37pt) + FIRMA CONTRATANTE

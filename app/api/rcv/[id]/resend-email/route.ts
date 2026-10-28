@@ -43,7 +43,7 @@ export async function POST(
     const pdfBuffer = await generateRCVPdf(policyForPdf, baseUrl)
     const pdfFileName = `RCV-${policy.policy_number}.pdf`
 
-    await sendPolicyEmail({
+    const mailRes = await sendPolicyEmail({
       to: policy.clients.email,
       clientName: policy.clients.full_name,
       policyNumber: policy.policy_number,
@@ -55,11 +55,15 @@ export async function POST(
       verifyUrl: `${baseUrl}/rcv/${policy.id}`,
     })
 
-    await updatePolicyFields(policy.id, { email_sent: true })
+    await updatePolicyFields(policy.id, { email_sent: mailRes.sent })
 
     return NextResponse.json({
       success: true,
-      message: `Correo enviado exitosamente a ${policy.clients.email}`,
+      provider: mailRes.provider,
+      delivered_to: mailRes.deliveredTo,
+      message: mailRes.note
+        ? `Correo enviado (${mailRes.note})`
+        : `Correo con PDF enviado exitosamente a ${mailRes.deliveredTo}`,
     })
   } catch (err: any) {
     return NextResponse.json(

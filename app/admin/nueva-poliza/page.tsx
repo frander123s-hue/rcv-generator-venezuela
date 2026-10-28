@@ -192,13 +192,13 @@ export default function NuevaPolizaPage() {
 
           {submitResult.emailSent ? (
             <div className="bg-green-50 border border-green-200 text-green-800 rounded-lg p-3 text-sm mb-5">
-              📧 Correo enviado automáticamente al cliente con el PDF adjunto.
+              📧 {submitResult.emailWarning || 'Correo enviado automáticamente al cliente con el PDF adjunto.'}
             </div>
           ) : (
             <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-3 text-sm mb-5">
               ⚠️ El PDF se creó y guardó correctamente.{' '}
               {submitResult.emailWarning ||
-                'Cuando cargues tu RESEND_API_KEY se enviará por correo automáticamente.'}
+                'Cuando cargues tu GMAIL_APP_PASSWORD o RESEND_API_KEY se enviará por correo automáticamente.'}
             </div>
           )}
 

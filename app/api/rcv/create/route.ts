@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
     let emailErrorMsg = ''
     if (email) {
       try {
-        await sendPolicyEmail({
+        const mailRes = await sendPolicyEmail({
           to: email,
           clientName: full_name,
           policyNumber: fullPolicy.policy_number,
@@ -196,7 +196,10 @@ export async function POST(request: NextRequest) {
           pdfFileName,
           verifyUrl: qr_url,
         })
-        emailSent = true
+        emailSent = mailRes.sent
+        if (mailRes.note) {
+          emailErrorMsg = mailRes.note
+        }
       } catch (emailErr: any) {
         console.warn('Email send warning:', emailErr?.message || emailErr)
         emailErrorMsg = emailErr?.message || 'Nota en envío de correo'
