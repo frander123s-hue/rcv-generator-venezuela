@@ -43,7 +43,8 @@ export async function POST(request: NextRequest) {
           res.cookies.set('rcv_admin_session', data.user.email || email, {
             httpOnly: true,
             path: '/',
-            maxAge: 60 * 60 * 24 * 7,
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 30,
           })
           return res
         }
@@ -59,7 +60,8 @@ export async function POST(request: NextRequest) {
       res.cookies.set('rcv_admin_session', email.trim(), {
         httpOnly: true,
         path: '/',
-        maxAge: 60 * 60 * 24 * 7,
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 30,
       })
       return res
     }

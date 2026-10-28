@@ -96,9 +96,13 @@ const steps = [
   { id: 5, label: 'Módulo 5: Emitir PDF + Correo', icon: '✅' },
 ]
 
+const DRAFT_STORAGE_KEY = 'rcv_draft_form_v1'
+const DRAFT_STEP_KEY = 'rcv_draft_step_v1'
+
 export default function NuevaPolizaPage() {
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState<FormData>(defaultFormData)
+  const [draftLoaded, setDraftLoaded] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitResult, setSubmitResult] = useState<{
     success: boolean
@@ -111,7 +115,63 @@ export default function NuevaPolizaPage() {
     error?: string
   } | null>(null)
 
+  // 1. Restaurar borrador guardado automáticamente (si el usuario salió a WhatsApp/Cámara desde el teléfono)
   useEffect(() => {
+    let hadSavedPolicyNum = false
+    try {
+      const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY)
+      const savedStep = localStorage.getItem(DRAFT_STEP_KEY)
+      if (savedDraft) {
+        const parsed = JSON.parse(savedDraft)
+        if (parsed && typeof parsed === 'object') {
+          setFormData((prev) => ({
+            ...prev,
+            ...parsed,
+            photo_file: null,
+          }))
+          if (parsed.policy_number) {
+            hadSavedPolicyNum = true
+          }
+        }
+      }
+      if (savedStep) {
+        const stepNum = parseInt(savedStep, 10)
+        if (stepNum >= 1 && stepNum <= 5) {
+          setCurrentStep(stepNum)
+        }
+      }
+    } catch {}
+    setDraftLoaded(true)
+
+    if (!hadSavedPolicyNum) {
+      fetch('/api/rcv/lookup?nextNumber=1')
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.policy_number) {
+            setFormData((prev) => ({ ...prev, policy_number: d.policy_number }))
+          }
+        })
+        .catch(() => {})
+    }
+  }, [])
+
+  // 2. Guardar borrador automáticamente en localStorage cada vez que cambia cualquier campo o paso
+  useEffect(() => {
+    if (!draftLoaded) return
+    try {
+      const { photo_file, ...serializableData } = formData
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(serializableData))
+      localStorage.setItem(DRAFT_STEP_KEY, String(currentStep))
+    } catch {}
+  }, [formData, currentStep, draftLoaded])
+
+  const clearDraft = () => {
+    try {
+      localStorage.removeItem(DRAFT_STORAGE_KEY)
+      localStorage.removeItem(DRAFT_STEP_KEY)
+    } catch {}
+    setFormData(defaultFormData)
+    setCurrentStep(1)
     fetch('/api/rcv/lookup?nextNumber=1')
       .then((r) => r.json())
       .then((d) => {
@@ -120,7 +180,7 @@ export default function NuevaPolizaPage() {
         }
       })
       .catch(() => {})
-  }, [])
+  }
 
   const updateFormData = (data: Partial<FormData>) => {
     setFormData((prev) => ({ ...prev, ...data }))
@@ -138,6 +198,8 @@ export default function NuevaPolizaPage() {
       Object.entries(formData).forEach(([key, value]) => {
         if (key === 'photo_file' && value instanceof File) {
           fd.append('photo_file', value)
+        } else if (key === 'photo_preview' && typeof value === 'string' && value) {
+          fd.append('photo_preview', value)
         } else if (key !== 'photo_preview' && key !== 'photo_file') {
           fd.append(key, String(value))
         }
@@ -153,6 +215,11 @@ export default function NuevaPolizaPage() {
       if (!response.ok) {
         throw new Error(result.error || 'Error al crear la póliza')
       }
+
+      try {
+        localStorage.removeItem(DRAFT_STORAGE_KEY)
+        localStorage.removeItem(DRAFT_STEP_KEY)
+      } catch {}
 
       setSubmitResult({
         success: true,
@@ -237,13 +304,24 @@ export default function NuevaPolizaPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="mb-4 sm:mb-6">
-        <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
-          Generador de Póliza RCV por Módulos
-        </h1>
-        <p className="text-gray-500 text-xs sm:text-sm mt-1">
-          Filtra o llena cada módulo con el dato necesario para emitir el PDF oficial con QR y foto del asegurado
-        </p>
+      <div className="mb-4 sm:mb-6 flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+            Generador de Póliza RCV por Módulos
+          </h1>
+          <p className="text-gray-500 text-xs sm:text-sm mt-0.5">
+            💾 Autoguardado activo: puedes cambiar a WhatsApp o Cámara sin perder tus datos
+          </p>
+        </div>
+        {(formData.full_name || formData.cedula_rif || formData.plate) && (
+          <button
+            type="button"
+            onClick={clearDraft}
+            className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg font-medium transition-colors"
+          >
+            🗑️ Limpiar borrador
+          </button>
+        )}
       </div>
 
       {/* Stepper */}

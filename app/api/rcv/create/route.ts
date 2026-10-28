@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
         : origin
 
     // 1. Handle client photo in memory + Supabase Storage (or Data URL fallback, no filesystem writes)
+    const photo_preview_raw = ((formData.get('photo_preview') as string) || '').trim()
     let photo_url: string | undefined
     if (photo_file && photo_file.size > 0) {
       const photoBytes = await photo_file.arrayBuffer()
@@ -92,6 +93,8 @@ export async function POST(request: NextRequest) {
           }
         } catch {}
       }
+    } else if (photo_preview_raw.startsWith('data:image/') || photo_preview_raw.startsWith('http')) {
+      photo_url = photo_preview_raw
     }
 
     // 2. Policy number (auto-generate unique if duplicate)
