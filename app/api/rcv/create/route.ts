@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
 import { createAdminClient } from '@/lib/supabase/server'
 import { generateRCVPdf } from '@/lib/pdf/generateRCV'
 import { sendPolicyEmail } from '@/lib/email/sendPolicy'
@@ -63,47 +61,44 @@ export async function POST(request: NextRequest) {
         ? process.env.NEXT_PUBLIC_BASE_URL
         : origin
 
-    // 1. Handle client photo upload (Supabase Storage + local public folder)
+    // 1. Handle client photo in memory + Supabase Storage (or Data URL fallback, no filesystem writes)
     let photo_url: string | undefined
     if (photo_file && photo_file.size > 0) {
       const photoBytes = await photo_file.arrayBuffer()
       const photoBuffer = Buffer.from(photoBytes)
-      const ext = photo_file.type.includes('png') ? 'png' : 'jpg'
+      const mimeType = photo_file.type.includes('png') ? 'image/png' : 'image/jpeg'
+      const ext = mimeType === 'image/png' ? 'png' : 'jpg'
       const safeName = `photo-${Date.now()}.${ext}`
 
-      // Save locally in public/uploads/photos so PDF generator can always read it fast
-      const localPhotoDir = path.join(process.cwd(), 'public', 'uploads', 'photos')
-      if (!fs.existsSync(localPhotoDir)) {
-        fs.mkdirSync(localPhotoDir, { recursive: true })
-      }
-      fs.writeFileSync(path.join(localPhotoDir, safeName), photoBuffer)
-      photo_url = `/uploads/photos/${safeName}`
+      // Default in-memory data URL so it always renders in PDF and QR page
+      photo_url = `data:${mimeType};base64,${photoBuffer.toString('base64')}`
 
-      // Also upload to Supabase Storage if configured
       if (isSupabaseConfigured()) {
         try {
           const supabase = await createAdminClient()
           const { data: photoData, error: photoError } = await supabase.storage
             .from('client-photos')
             .upload(safeName, photoBuffer, {
-              contentType: photo_file.type,
+              contentType: mimeType,
               upsert: true,
             })
           if (!photoError && photoData) {
             const { data: urlData } = supabase.storage
               .from('client-photos')
               .getPublicUrl(photoData.path)
-            photo_url = urlData.publicUrl
+            if (urlData?.publicUrl) {
+              photo_url = urlData.publicUrl
+            }
           }
         } catch {}
       }
     }
 
-    // 2. Policy number
-    const policy_number = custom_policy_number || (await getNextPolicyNumber())
+    // 2. Policy number (auto-generate unique if duplicate)
+    let policy_number = custom_policy_number || (await getNextPolicyNumber())
     const receipt_number = policy_number
 
-    // 3. Save full record
+    // 3. Save full record to Supabase
     const fullPolicy = await saveFullRCVRecord({
       client: {
         full_name,
@@ -158,28 +153,9 @@ export async function POST(request: NextRequest) {
       ],
     })
 
-    // Resolve local photo path for PDF generation if relative
-    const policyForPdf = {
-      ...fullPolicy,
-      clients: {
-        ...fullPolicy.clients,
-        photo_url:
-          fullPolicy.clients.photo_url?.startsWith('/uploads/')
-            ? path.join(process.cwd(), 'public', fullPolicy.clients.photo_url)
-            : fullPolicy.clients.photo_url,
-      },
-    }
-
-    // 4. Generate PDF Buffer
-    const pdfBuffer = await generateRCVPdf(policyForPdf, baseUrl)
-    const pdfFileName = `RCV-${policy_number}.pdf`
-
-    // Save PDF locally in public/uploads/pdfs and serve via /api/rcv/[id]/pdf
-    const localPdfDir = path.join(process.cwd(), 'public', 'uploads', 'pdfs')
-    if (!fs.existsSync(localPdfDir)) {
-      fs.mkdirSync(localPdfDir, { recursive: true })
-    }
-    fs.writeFileSync(path.join(localPdfDir, pdfFileName), pdfBuffer)
+    // 4. Generate PDF Buffer completely in memory (no disk write to /var/task)
+    const pdfBuffer = await generateRCVPdf(fullPolicy, baseUrl)
+    const pdfFileName = `RCV-${fullPolicy.policy_number}.pdf`
     let pdf_url = `/api/rcv/${fullPolicy.id}/pdf`
 
     if (isSupabaseConfigured()) {
@@ -195,7 +171,9 @@ export async function POST(request: NextRequest) {
           const { data: pdfUrlData } = supabase.storage
             .from('rcv-pdfs')
             .getPublicUrl(pdfUpload.path)
-          pdf_url = pdfUrlData.publicUrl
+          if (pdfUrlData?.publicUrl) {
+            pdf_url = pdfUrlData.publicUrl
+          }
         }
       } catch {}
     }
@@ -210,7 +188,7 @@ export async function POST(request: NextRequest) {
         await sendPolicyEmail({
           to: email,
           clientName: full_name,
-          policyNumber: policy_number,
+          policyNumber: fullPolicy.policy_number,
           vehiclePlate: plate,
           startDate: start_date,
           endDate: end_date,
@@ -221,12 +199,12 @@ export async function POST(request: NextRequest) {
         emailSent = true
       } catch (emailErr: any) {
         console.warn('Email send warning:', emailErr?.message || emailErr)
-        emailErrorMsg = emailErr?.message || 'Error al enviar correo (verifica RESEND_API_KEY)'
+        emailErrorMsg = emailErr?.message || 'Nota en envío de correo'
       }
     }
 
     await updatePolicyFields(fullPolicy.id, {
-      pdf_url,
+      pdf_url: `/api/rcv/${fullPolicy.id}/pdf`,
       qr_url,
       email_sent: emailSent,
     })
@@ -234,8 +212,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       policy_id: fullPolicy.id,
-      policy_number,
-      receipt_number,
+      policy_number: fullPolicy.policy_number,
+      receipt_number: fullPolicy.receipt_number,
       pdf_url: `/api/rcv/${fullPolicy.id}/pdf`,
       qr_url,
       email_sent: emailSent,

@@ -37,11 +37,15 @@ function readLocalDb(): LocalDatabase {
 }
 
 function writeLocalDb(db: LocalDatabase) {
-  const dir = path.dirname(LOCAL_DB_PATH)
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true })
+  try {
+    const dir = path.dirname(LOCAL_DB_PATH)
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true })
+    }
+    fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify(db, null, 2), 'utf-8')
+  } catch {
+    // Ignore read-only filesystem in Vercel serverless environment
   }
-  fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify(db, null, 2), 'utf-8')
 }
 
 export async function getNextPolicyNumber(): Promise<string> {
@@ -109,11 +113,24 @@ export async function saveFullRCVRecord(input: {
         .single()
       if (vErr) throw new Error(vErr.message)
 
-      // 3. Insert policy
+      // 3. Insert policy (ensure unique policy_number if already taken)
+      let finalPolicyNumber = input.policy.policy_number
+      const { data: existingPol } = await supabase
+        .from('policies')
+        .select('id')
+        .eq('policy_number', finalPolicyNumber)
+        .maybeSingle()
+
+      if (existingPol) {
+        finalPolicyNumber = String(43114 + Math.floor(Math.random() * 90000)).padStart(10, '0')
+      }
+
       const { data: newPolicy, error: pErr } = await supabase
         .from('policies')
         .insert({
           ...input.policy,
+          policy_number: finalPolicyNumber,
+          receipt_number: finalPolicyNumber,
           client_id: clientId,
           vehicle_id: newVehicle.id,
         })
