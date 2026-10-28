@@ -351,15 +351,13 @@ export async function generateRCVPdf(
     size: 7.5,
     font: fontBold,
   })
-  page1.drawText(
-    `ASESOR: ${policy.advisor || 'OFICINA'}   SUPERVISOR: ${policy.supervisor || 'GERENCIA'}`,
-    {
-      x: margin + 215,
-      y: curY + 3.5,
-      size: 6.8,
-      font: fontBold,
-    }
-  )
+  const advisorSupervisorText = `ASESOR: ${(policy.advisor || 'OFICINA').substring(0, 16)}   SUPERVISOR: ${(policy.supervisor || 'GERENCIA').substring(0, 16)}`
+  page1.drawText(advisorSupervisorText, {
+    x: margin + 170,
+    y: curY + 3.5,
+    size: 6.5,
+    font: fontBold,
+  })
 
   // Client Row 1: Beneficiario | C.I/RIF | Correo
   curY -= 15
