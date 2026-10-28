@@ -22,12 +22,12 @@ export const COMPANY_CONFIG = {
 const BLACK = rgb(0, 0, 0)
 const WHITE = rgb(1, 1, 1)
 const DARK_GRAY = rgb(0.22, 0.22, 0.22)
-const MID_GRAY = rgb(0.45, 0.45, 0.45)
+const MID_GRAY = rgb(0.48, 0.48, 0.48)
 const LIGHT_GRAY = rgb(0.93, 0.93, 0.93)
-const BORDER_GRAY = rgb(0.35, 0.35, 0.35)
+const BORDER_GRAY = rgb(0.25, 0.25, 0.25)
 const GOLD_BROWN = rgb(0.58, 0.38, 0.12)
 const SEA_BLUE = rgb(0.16, 0.42, 0.65)
-const STAMP_BLUE = rgb(0.12, 0.24, 0.48)
+const STAMP_RED = rgb(0.82, 0.06, 0.06)
 
 function formatDateDash(dateStr: string): string {
   if (!dateStr) return ''
@@ -80,10 +80,9 @@ function drawCorporateLogo(
   fontBold: PDFFont,
   scale: number = 1
 ) {
-  // Globe icon (matching original style)
-  const radius = 12 * scale
-  const cx = x + 22 * scale
-  const cy = y + 18 * scale
+  const radius = 11 * scale
+  const cx = x + 20 * scale
+  const cy = y + 16 * scale
 
   page.drawCircle({
     x: cx,
@@ -91,57 +90,121 @@ function drawCorporateLogo(
     size: radius,
     color: GOLD_BROWN,
     borderColor: DARK_GRAY,
-    borderWidth: 0.8 * scale,
+    borderWidth: 0.7 * scale,
   })
   page.drawCircle({
-    x: cx + 2 * scale,
-    y: cy + 1 * scale,
+    x: cx + 1.8 * scale,
+    y: cy + 0.8 * scale,
     size: radius * 0.55,
     color: SEA_BLUE,
   })
-  // Grid lines on globe
   page.drawLine({
     start: { x: cx - radius, y: cy },
     end: { x: cx + radius, y: cy },
-    thickness: 0.4 * scale,
+    thickness: 0.35 * scale,
     color: WHITE,
   })
   page.drawLine({
     start: { x: cx, y: cy - radius },
     end: { x: cx, y: cy + radius },
-    thickness: 0.4 * scale,
+    thickness: 0.35 * scale,
     color: WHITE,
   })
 
-  // Text: CORPORACION / VENEZOLANA / DE GARANTIAS
   page.drawText('C', {
     x: x,
-    y: y + 14 * scale,
-    size: 11 * scale,
+    y: y + 12 * scale,
+    size: 10.5 * scale,
     font: fontBold,
     color: MID_GRAY,
   })
   page.drawText('RPORACION', {
-    x: x + 36 * scale,
-    y: y + 14 * scale,
-    size: 10 * scale,
+    x: x + 33 * scale,
+    y: y + 12 * scale,
+    size: 9.5 * scale,
     font: fontBold,
     color: MID_GRAY,
   })
   page.drawText(COMPANY_CONFIG.shortBrandMid, {
-    x: x + 18 * scale,
-    y: y + 3 * scale,
-    size: 12.5 * scale,
+    x: x + 16 * scale,
+    y: y + 2 * scale,
+    size: 11.8 * scale,
     font: fontBold,
     color: DARK_GRAY,
   })
   page.drawText(COMPANY_CONFIG.shortBrandBot, {
-    x: x + 20 * scale,
+    x: x + 18 * scale,
     y: y - 5 * scale,
-    size: 7.5 * scale,
+    size: 7 * scale,
     font: fontBold,
     color: MID_GRAY,
   })
+}
+
+/**
+ * Dibuja el sello corporativo con el logo de fondo y el sello rojo "PAGADO"
+ * con doble línea roja paralela inclinado a 26 grados (idéntico al original pero con VENEZOLANA).
+ */
+function drawPagadoStamp(
+  page: PDFPage,
+  x: number,
+  y: number,
+  fontBold: PDFFont,
+  scale: number = 1,
+  includeRif: boolean = false
+) {
+  // 1. Logo corporativo suave al fondo
+  drawCorporateLogo(page, x, y + 6 * scale, fontBold, 0.52 * scale)
+
+  // 2. Sello rojo inclinado "PAGADO" con líneas paralelas arriba y abajo
+  const angleDeg = 25
+  const rad = (angleDeg * Math.PI) / 180
+  const cos = Math.cos(rad)
+  const sin = Math.sin(rad)
+
+  const baseX = x + 8 * scale
+  const baseY = y - 2 * scale
+  const lineLen = 58 * scale
+
+  // Línea roja superior (desplazada perpendicularmente hacia arriba-izquierda)
+  const topOffset = 12.5 * scale
+  const topStartX = baseX - topOffset * sin
+  const topStartY = baseY + topOffset * cos
+  page.drawLine({
+    start: { x: topStartX, y: topStartY },
+    end: { x: topStartX + lineLen * cos, y: topStartY + lineLen * sin },
+    thickness: 1.1 * scale,
+    color: STAMP_RED,
+  })
+
+  // Texto rojo "PAGADO"
+  page.drawText('PAGADO', {
+    x: baseX + 2 * scale,
+    y: baseY + 1.5 * scale,
+    size: 12 * scale,
+    font: fontBold,
+    color: STAMP_RED,
+    rotate: degrees(angleDeg),
+  })
+
+  // Línea roja inferior
+  page.drawLine({
+    start: { x: baseX, y: baseY - 1 * scale },
+    end: { x: baseX + lineLen * cos, y: baseY - 1 * scale + lineLen * sin },
+    thickness: 1.1 * scale,
+    color: STAMP_RED,
+  })
+
+  if (includeRif) {
+    page.drawText(`RIF: ${COMPANY_CONFIG.rif}`, {
+      x: baseX + 8 * scale,
+      y: baseY - 7 * scale,
+      size: 5.5 * scale,
+      font: fontBold,
+      color: DARK_GRAY,
+      rotate: degrees(angleDeg),
+    })
+  }
 }
 
 async function loadSignatureImage(pdfDoc: PDFDocument) {
@@ -201,8 +264,9 @@ export async function generateRCVPdf(
   const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica)
   const fontOblique = await pdfDoc.embedFont(StandardFonts.HelveticaOblique)
 
-  const pageWidth = 595.28 // A4 width
-  const pageHeight = 841.89 // A4 height
+  // Dimensiones exactas A4 del XML original: w=11910 twips (595.5pt), h=16850 twips (842.5pt)
+  const pageWidth = 595.5
+  const pageHeight = 842.5
 
   const signatureImg = await loadSignatureImage(pdfDoc)
   const clientPhotoImg = await loadClientPhoto(pdfDoc, policy.clients?.photo_url)
@@ -217,7 +281,7 @@ export async function generateRCVPdf(
   }
 
   // ============================================================
-  // PÁGINA 1: PÓLIZA PRINCIPAL (SUPERIOR) + 2 CARNETS RCV (INFERIOR)
+  // PÁGINA 1: PÓLIZA PRINCIPAL + 2 CARNETS CON DIMENSIONES EXACTAS (259.2pt x 150.3pt)
   // ============================================================
   const page1 = pdfDoc.addPage([pageWidth, pageHeight])
   const margin = 24
@@ -332,7 +396,7 @@ export async function generateRCVPdf(
   })
 
   // --- TABLA DATOS DEL CLIENTE + FOTO + QR ---
-  const rightPanelWidth = 128 // Space on the right for Client Photo + QR
+  const rightPanelWidth = 128
   const leftTableWidth = contentWidth - rightPanelWidth
 
   curY -= 13
@@ -351,7 +415,7 @@ export async function generateRCVPdf(
     size: 7.5,
     font: fontBold,
   })
-  const advisorSupervisorText = `ASESOR: ${(policy.advisor || 'OFICINA').substring(0, 16)}   SUPERVISOR: ${(policy.supervisor || 'GERENCIA').substring(0, 16)}`
+  const advisorSupervisorText = `ASESOR: ${(policy.advisor || 'OFICINA').substring(0, 15)}   SUPERVISOR: ${(policy.supervisor || 'GERENCIA').substring(0, 15)}`
   page1.drawText(advisorSupervisorText, {
     x: margin + 170,
     y: curY + 3.5,
@@ -381,10 +445,10 @@ export async function generateRCVPdf(
     size: 7.2,
     font: fontBold,
   })
-  page1.drawText(`CORREO: ${(policy.clients?.email || '').substring(0, 26)}`, {
+  page1.drawText(`CORREO: ${(policy.clients?.email || '').substring(0, 25)}`, {
     x: margin + 300,
     y: curY + 4.5,
-    size: 6.5,
+    size: 6.3,
     font: fontRegular,
   })
 
@@ -527,7 +591,7 @@ export async function generateRCVPdf(
   // --- PANEL LATERAL DERECHO: FOTO DEL CLIENTE + CÓDIGO QR ---
   const sideBoxX = margin + leftTableWidth
   const sideBoxY = curY
-  const sideBoxH = 101 // Covers Client + Vehicle rows exactly
+  const sideBoxH = 101
   page1.drawRectangle({
     x: sideBoxX,
     y: sideBoxY,
@@ -537,7 +601,7 @@ export async function generateRCVPdf(
     borderWidth: 0.7,
   })
 
-  // Foto del cliente (Izquierda del panel lateral)
+  // Foto del cliente
   const photoW = 56
   const photoH = 72
   const photoX = sideBoxX + 6
@@ -570,7 +634,7 @@ export async function generateRCVPdf(
     color: DARK_GRAY,
   })
 
-  // QR Code (Derecha del panel lateral)
+  // QR Code
   const qrSize = 58
   const qrX = sideBoxX + 66
   const qrY = sideBoxY + 25
@@ -642,7 +706,6 @@ export async function generateRCVPdf(
     })
   }
 
-  // Bloque agrupado de €500,00 (Muerte, Invalidez, Gastos Médicos, Gastos Funerarios)
   const muerteAmount = covMap['MUERTE_CONDUCTOR'] ?? 500
   const extraLines = [
     'MUERTE DEL CONDUCTOR Y/O PASAJEROS',
@@ -704,303 +767,257 @@ export async function generateRCVPdf(
     font: fontBold,
   })
 
-  // --- FIRMA AUTORIZADA CENTRAL (DEBAJO DEL CUADRO PRINCIPAL) ---
-  curY -= 50
+  // --- FIRMA AUTORIZADA + SELLO DE PAGADO EN EL CUADRO PRINCIPAL ---
+  curY -= 44
   if (signatureImg) {
     page1.drawImage(signatureImg, {
-      x: pageWidth / 2 - 55,
-      y: curY + 8,
-      width: 110,
-      height: 38,
+      x: pageWidth / 2 - 58,
+      y: curY + 4,
+      width: 105,
+      height: 32,
     })
   }
-  page1.drawLine({
-    start: { x: pageWidth / 2 - 70, y: curY + 8 },
-    end: { x: pageWidth / 2 + 70, y: curY + 8 },
-    thickness: 0.7,
-    color: BLACK,
-  })
-  page1.drawText('FIRMA AUTORIZADA', {
-    x: pageWidth / 2 - 38,
-    y: curY - 1,
-    size: 7,
+  drawPagadoStamp(page1, pageWidth / 2 + 42, curY + 8, fontBold, 0.85, false)
+
+  // ============================================================
+  // MITAD INFERIOR PÁGINA 1: DOS CARNETS CON LAS MISMAS DIMENSIONES DEL ORIGINAL
+  // Del XML original:
+  //   Carnet Izquierdo: width = 5184 twips = 259.2 pt, height = 3006 twips = 150.3 pt
+  //   Carnet Derecho:   width = 5184 twips = 259.2 pt, height = 3006 twips = 150.3 pt
+  //   Separación entre ambos: 13 twips = 0.65 pt (unidos al centro, margen izquierdo = 38.2 pt)
+  // ============================================================
+  const cardWidth = 259.2
+  const cardHeight = 150.3
+  const cardsStartX = (pageWidth - cardWidth * 2) / 2 // 38.55 pt
+  const cardTopY = curY - 12
+  const cardY = cardTopY - cardHeight
+
+  // Pequeño texto sobre el carnet izquierdo como en docshape7 (FIRMA CONTRATANTE de la póliza superior)
+  page1.drawText('FIRMA CONTRATANTE', {
+    x: cardsStartX + 65,
+    y: cardTopY + 4,
+    size: 6.5,
     font: fontBold,
   })
 
-  // Línea punteada de corte
-  curY -= 12
-  for (let dashX = margin; dashX < pageWidth - margin; dashX += 8) {
-    page1.drawLine({
-      start: { x: dashX, y: curY },
-      end: { x: dashX + 4, y: curY },
-      thickness: 0.5,
-      color: MID_GRAY,
-    })
-  }
-
-  // ============================================================
-  // MITAD INFERIOR PÁGINA 1: DOS CARNETS / CERTIFICADOS RCV
-  // ============================================================
-  const cardTopY = curY - 10
-  const cardHeight = 225
-  const cardY = cardTopY - cardHeight
-  const cardWidth = (contentWidth - 14) / 2
-
   for (let idx = 0; idx < 2; idx++) {
-    const cX = idx === 0 ? margin : margin + cardWidth + 14
+    const cX = idx === 0 ? cardsStartX : cardsStartX + cardWidth
 
-    // Borde exterior del carnet
+    // Rectángulo del carnet con borde negro de 2pt exacto al original (strokeweight="2.5pt")
     page1.drawRectangle({
       x: cX,
       y: cardY,
       width: cardWidth,
       height: cardHeight,
-      borderColor: BORDER_GRAY,
-      borderWidth: 0.9,
+      color: WHITE,
+      borderColor: BLACK,
+      borderWidth: 1.8,
     })
 
-    // Logo pequeño en esquina superior izquierda del carnet
-    drawCorporateLogo(page1, cX + 6, cardTopY - 26, fontBold, 0.65)
+    // Logo pequeño en esquina superior izquierda del carnet (docshape11: width=66pt, height=19.5pt)
+    drawCorporateLogo(page1, cX + 8, cardTopY - 22, fontBold, 0.56)
 
-    // RIF y Nombre de la Corporación a la derecha del logo
+    // Encabezado derecho del carnet: RIF, Razón Social, SEGURO RCV, F.EMISION, F.VENCIMIENTO
+    const hdrX = cX + 90
     page1.drawText(`RIF:${COMPANY_CONFIG.rif}`, {
-      x: cX + 108,
-      y: cardTopY - 14,
-      size: 6.5,
-      font: fontBold,
-    })
-    page1.drawText(COMPANY_CONFIG.name, {
-      x: cX + 82,
-      y: cardTopY - 23,
+      x: hdrX + 35,
+      y: cardTopY - 10,
       size: 5.8,
       font: fontBold,
     })
+    page1.drawText(COMPANY_CONFIG.name, {
+      x: hdrX,
+      y: cardTopY - 17,
+      size: 5.4,
+      font: fontBold,
+    })
     page1.drawText('SEGURO RCV', {
-      x: cX + 115,
-      y: cardTopY - 32,
-      size: 7,
+      x: hdrX + 42,
+      y: cardTopY - 24,
+      size: 6,
+      font: fontBold,
+    })
+    page1.drawText(`F.EMISION: ${formatDateSlash(policy.emission_date)}`, {
+      x: hdrX + 28,
+      y: cardTopY - 31,
+      size: 5.8,
       font: fontBold,
     })
 
-    // Fechas y Contrato No
-    let rowY = cardTopY - 46
-    page1.drawText(`F.EMISION: ${formatDateSlash(policy.emission_date)}`, {
-      x: cX + 8,
-      y: rowY,
-      size: 6.8,
-      font: fontBold,
-    })
-    rowY -= 10
+    // F. VENCIMIENTO (izquierda) y CONTRATO No (derecha)
+    let rowY = cardTopY - 39
     page1.drawText(`F. VENCIMIENTO: ${formatDateSlash(policy.end_date)}`, {
-      x: cX + 8,
+      x: cX + 6,
       y: rowY,
-      size: 6.8,
+      size: 5.8,
       font: fontBold,
     })
     page1.drawText(`CONTRATO No: .${policy.policy_number}`, {
-      x: cX + 130,
+      x: cX + 135,
       y: rowY,
-      size: 6.8,
+      size: 5.8,
       font: fontBold,
     })
 
-    // Contratante y C.I/RIF
-    rowY -= 12
+    // CONTRATANTE y C.I/RIF
+    rowY -= 8.5
     page1.drawText(
-      `CONTRATANTE:  ${(policy.clients?.full_name || '').toUpperCase().substring(0, 28)}`,
+      `CONTRATANTE: ${(policy.clients?.full_name || '').toUpperCase().substring(0, 34)}`,
       {
-        x: cX + 8,
+        x: cX + 6,
         y: rowY,
-        size: 6.8,
+        size: 5.8,
         font: fontBold,
       }
     )
-    rowY -= 10
+    rowY -= 8
     page1.drawText(`C.I/RIF: ${policy.clients?.cedula_rif || ''}`, {
-      x: cX + 8,
+      x: cX + 6,
       y: rowY,
-      size: 6.8,
+      size: 5.8,
       font: fontBold,
     })
 
-    // Mini foto del cliente + Mini QR en el carnet (esquina derecha)
-    if (clientPhotoImg) {
+    // Sello de PAGADO central en el carnet derecho (docshape15: x=6340, y=1559)
+    if (idx === 1) {
+      drawPagadoStamp(page1, cX + 45, cardY + 58, fontBold, 0.92, false)
+    }
+
+    // Datos del vehículo en 2 columnas compactas
+    rowY -= 10
+    const colA = cX + 6
+    const colB = cX + 94
+
+    page1.drawText(`CLASE: ${(v?.class || 'MOTO').toUpperCase()}`, {
+      x: colA,
+      y: rowY,
+      size: 5.8,
+      font: fontBold,
+    })
+    page1.drawText(`USO:  ${(v?.use_type || 'PARTICULAR').toUpperCase()}`, {
+      x: colB,
+      y: rowY,
+      size: 5.8,
+      font: fontBold,
+    })
+
+    rowY -= 8
+    page1.drawText(`MARCA: ${(v?.brand || '').toUpperCase()}`, {
+      x: colA,
+      y: rowY,
+      size: 5.8,
+      font: fontBold,
+    })
+    page1.drawText(`COLOR: ${(v?.color || '').toUpperCase()}`, {
+      x: colB,
+      y: rowY,
+      size: 5.8,
+      font: fontBold,
+    })
+
+    rowY -= 8
+    page1.drawText(`MODELO: ${(v?.model || '').toUpperCase().substring(0, 14)}`, {
+      x: colA,
+      y: rowY,
+      size: 5.8,
+      font: fontBold,
+    })
+    page1.drawText(`AÑO: ${v?.year || ''}`, {
+      x: colB,
+      y: rowY,
+      size: 5.8,
+      font: fontBold,
+    })
+
+    rowY -= 8
+    page1.drawText(`PLACA: ${(v?.plate || '').toUpperCase()}`, {
+      x: colA,
+      y: rowY,
+      size: 5.8,
+      font: fontBold,
+    })
+    page1.drawText(`TIPO:  ${(v?.type || 'PASEO').toUpperCase()}`, {
+      x: colB,
+      y: rowY,
+      size: 5.8,
+      font: fontBold,
+    })
+
+    rowY -= 8.5
+    page1.drawText(`SERIAL CARROCERIA: ${(v?.vin || 'S/N').toUpperCase()}`, {
+      x: colA,
+      y: rowY,
+      size: 5.8,
+      font: fontBold,
+    })
+
+    // QR Code en la parte derecha del carnet (docshape16: width=59pt, height=58pt)
+    if (qrImg) {
+      page1.drawImage(qrImg, {
+        x: cX + cardWidth - 62,
+        y: cardY + 46,
+        width: 52,
+        height: 52,
+      })
+    }
+
+    // Mini foto del cliente si fue cargada
+    if (clientPhotoImg && idx === 0) {
       page1.drawImage(clientPhotoImg, {
-        x: cX + cardWidth - 78,
-        y: rowY - 48,
+        x: cX + cardWidth - 102,
+        y: cardY + 50,
         width: 34,
         height: 44,
       })
       page1.drawRectangle({
-        x: cX + cardWidth - 78,
-        y: rowY - 48,
+        x: cX + cardWidth - 102,
+        y: cardY + 50,
         width: 34,
         height: 44,
         borderColor: BORDER_GRAY,
         borderWidth: 0.4,
       })
     }
-    if (qrImg) {
-      page1.drawImage(qrImg, {
-        x: cX + cardWidth - 40,
-        y: rowY - 46,
-        width: 34,
-        height: 34,
-      })
-    }
 
-    // Datos del vehículo en 2 columnas dentro del carnet
-    rowY -= 14
-    const colA = cX + 8
-    const colB = cX + 102
-
-    page1.drawText(`CLASE: ${(v?.class || 'MOTO').toUpperCase()}`, {
-      x: colA,
-      y: rowY,
-      size: 6.5,
-      font: fontBold,
-    })
-    page1.drawText(`USO: ${(v?.use_type || 'PARTICULAR').toUpperCase()}`, {
-      x: colB,
-      y: rowY,
-      size: 6.5,
-      font: fontBold,
-    })
-
-    rowY -= 10
-    page1.drawText(`MARCA: ${(v?.brand || '').toUpperCase()}`, {
-      x: colA,
-      y: rowY,
-      size: 6.5,
-      font: fontBold,
-    })
-    page1.drawText(`COLOR: ${(v?.color || '').toUpperCase()}`, {
-      x: colB,
-      y: rowY,
-      size: 6.5,
-      font: fontBold,
-    })
-
-    rowY -= 10
-    page1.drawText(`MODELO: ${(v?.model || '').toUpperCase().substring(0, 14)}`, {
-      x: colA,
-      y: rowY,
-      size: 6.5,
-      font: fontBold,
-    })
-    page1.drawText(`AÑO: ${v?.year || ''}`, {
-      x: colB,
-      y: rowY,
-      size: 6.5,
-      font: fontBold,
-    })
-
-    rowY -= 10
-    page1.drawText(`PLACA: ${(v?.plate || '').toUpperCase()}`, {
-      x: colA,
-      y: rowY,
-      size: 6.5,
-      font: fontBold,
-    })
-    page1.drawText(`TIPO: ${(v?.type || 'PASEO').toUpperCase()}`, {
-      x: colB,
-      y: rowY,
-      size: 6.5,
-      font: fontBold,
-    })
-
-    rowY -= 11
-    page1.drawText(`SERIAL CARROCERIA: ${(v?.vin || 'S/N').toUpperCase()}`, {
-      x: colA,
-      y: rowY,
-      size: 6.5,
-      font: fontBold,
-    })
-
-    // Zona de firmas del carnet
-    const sigLineY = cardY + 22
+    // Zona inferior de cada carnet (Firmas + Sello PAGADO)
     if (idx === 0) {
-      // Carnet izquierdo: FIRMA CONTRATANTE y FIRMA AUTORIZADA
-      page1.drawLine({
-        start: { x: cX + 12, y: sigLineY },
-        end: { x: cX + 115, y: sigLineY },
-        thickness: 0.6,
-        color: BLACK,
-      })
+      // Carnet Izquierdo: Sello PAGADO (docshape14: left=2662, top=2432, width=49pt, height=37pt) + FIRMA CONTRATANTE
+      drawPagadoStamp(page1, cX + 102, cardY + 20, fontBold, 0.65, false)
       page1.drawText('FIRMA CONTRATANTE', {
-        x: cX + 24,
-        y: sigLineY - 8,
-        size: 6,
-        font: fontBold,
-      })
-
-      if (signatureImg) {
-        page1.drawImage(signatureImg, {
-          x: cX + 145,
-          y: sigLineY + 1,
-          width: 85,
-          height: 28,
-        })
-      }
-      page1.drawLine({
-        start: { x: cX + 135, y: sigLineY },
-        end: { x: cX + cardWidth - 12, y: sigLineY },
-        thickness: 0.6,
-        color: BLACK,
-      })
-      page1.drawText('FIRMA AUTORIZADA', {
-        x: cX + 155,
-        y: sigLineY - 8,
-        size: 6,
+        x: cX + 6,
+        y: cardY + 6,
+        size: 5.8,
         font: fontBold,
       })
     } else {
-      // Carnet derecho: FIRMA CONTRATANTE y FIRMA AUTORIZADA + nota de validez
-      page1.drawLine({
-        start: { x: cX + 12, y: sigLineY },
-        end: { x: cX + 115, y: sigLineY },
-        thickness: 0.6,
-        color: BLACK,
-      })
-      page1.drawText('FIRMA CONTRATANTE', {
-        x: cX + 24,
-        y: sigLineY - 8,
-        size: 6,
-        font: fontBold,
-      })
-
+      // Carnet Derecho: Firma manuscrita (docshape8) + Sello PAGADO (docshape9) + FIRMA AUTORIZADA + nota legal
       if (signatureImg) {
         page1.drawImage(signatureImg, {
-          x: cX + 145,
-          y: sigLineY + 1,
-          width: 85,
+          x: cX + 38,
+          y: cardY + 12,
+          width: 88,
           height: 28,
         })
       }
-      page1.drawLine({
-        start: { x: cX + 135, y: sigLineY },
-        end: { x: cX + cardWidth - 12, y: sigLineY },
-        thickness: 0.6,
-        color: BLACK,
-      })
+      drawPagadoStamp(page1, cX + 158, cardY + 16, fontBold, 0.72, false)
+
       page1.drawText('FIRMA AUTORIZADA', {
-        x: cX + 155,
-        y: sigLineY - 8,
-        size: 6,
+        x: cX + 60,
+        y: cardY + 10,
+        size: 5.5,
         font: fontBold,
       })
+      page1.drawText(
+        'Este contrato para tener validez debe ser firmado y sellado por la persona autorizada',
+        {
+          x: cX + 6,
+          y: cardY + 3,
+          size: 4.8,
+          font: fontOblique,
+          color: DARK_GRAY,
+        }
+      )
     }
-
-    page1.drawText(
-      'Este contrato para tener validez debe ser firmado y sellado por la persona autorizada',
-      {
-        x: cX + 12,
-        y: cardY + 5,
-        size: 5.5,
-        font: fontOblique,
-        color: DARK_GRAY,
-      }
-    )
   }
 
   // ============================================================
@@ -1009,10 +1026,8 @@ export async function generateRCVPdf(
   const page2 = pdfDoc.addPage([pageWidth, pageHeight])
   let p2Y = pageHeight - 40
 
-  // Logo superior izquierdo
   drawCorporateLogo(page2, margin, p2Y - 12, fontBold, 0.9)
 
-  // RIF y Nombre a la derecha
   const rifHeader = `RIF: ${COMPANY_CONFIG.rif}`
   page2.drawText(rifHeader, {
     x: pageWidth - margin - fontBold.widthOfTextAtSize(rifHeader, 9.5),
@@ -1027,7 +1042,6 @@ export async function generateRCVPdf(
     font: fontBold,
   })
 
-  // Título Condicionado
   p2Y -= 42
   const condTitle = 'CONDICIONADO DE RESPONSABILIDAD CIVIL DE VEHICULO'
   page2.drawText(condTitle, {
@@ -1077,7 +1091,6 @@ export async function generateRCVPdf(
   // --- PIE DE PÁGINA 2: FIRMA CONTRATANTE + FIRMA Y SELLO DE LA CORPORACIÓN ---
   const footerSigY = 95
 
-  // Firma Contratante (Izquierda)
   page2.drawLine({
     start: { x: margin, y: footerSigY },
     end: { x: margin + 210, y: footerSigY },
@@ -1091,42 +1104,18 @@ export async function generateRCVPdf(
     font: fontBold,
   })
 
-  // Firma Autorizada + Sello Húmedo (Derecha)
   const rightSigX = pageWidth - margin - 230
   if (signatureImg) {
     page2.drawImage(signatureImg, {
-      x: rightSigX + 20,
+      x: rightSigX + 15,
       y: footerSigY + 2,
-      width: 125,
-      height: 44,
+      width: 120,
+      height: 42,
     })
   }
 
-  // Sello corporativo inclinado al lado de la firma
-  page2.drawText(COMPANY_CONFIG.shortBrandTop, {
-    x: rightSigX + 150,
-    y: footerSigY + 18,
-    size: 7.5,
-    font: fontBold,
-    color: STAMP_BLUE,
-    rotate: degrees(16),
-  })
-  page2.drawText(COMPANY_CONFIG.shortBrandMid, {
-    x: rightSigX + 152,
-    y: footerSigY + 9,
-    size: 9.5,
-    font: fontBold,
-    color: STAMP_BLUE,
-    rotate: degrees(16),
-  })
-  page2.drawText(`RIF: ${COMPANY_CONFIG.rif}`, {
-    x: rightSigX + 156,
-    y: footerSigY + 1,
-    size: 6.5,
-    font: fontBold,
-    color: STAMP_BLUE,
-    rotate: degrees(16),
-  })
+  // Sello PAGADO + RIF al lado derecho de la firma en el Condicionado
+  drawPagadoStamp(page2, rightSigX + 140, footerSigY + 12, fontBold, 0.88, true)
 
   page2.drawLine({
     start: { x: rightSigX, y: footerSigY },
