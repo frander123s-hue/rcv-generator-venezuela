@@ -1,0 +1,113 @@
+{
+  "clients": [
+    {
+      "id": "demo-client-0000043113",
+      "full_name": "MELVIN PASTOR PALACIOS PADRON",
+      "cedula_rif": "V-30629617",
+      "phone": "0412-5559876",
+      "email": "corporacionvenezolanadegaranti@gmail.com",
+      "address": "LOS TEQUES, ESTADO MIRANDA",
+      "created_at": "2026-03-09T12:00:00.000Z",
+      "updated_at": "2026-03-09T12:00:00.000Z"
+    }
+  ],
+  "vehicles": [
+    {
+      "id": "demo-vehicle-0000043113",
+      "client_id": "demo-client-0000043113",
+      "plate": "AE6Y92E",
+      "brand": "BERA",
+      "model": "BR-150/21",
+      "year": 2022,
+      "color": "AZUL",
+      "class": "MOTO",
+      "type": "PASEO",
+      "use_type": "PARTICULAR",
+      "vin": "8211MBCA3ND035786",
+      "capacity_persons": 2,
+      "capacity_load": "150 kgs",
+      "created_at": "2026-03-09T12:00:00.000Z"
+    }
+  ],
+  "policies": [
+    {
+      "id": "0000043113",
+      "client_id": "demo-client-0000043113",
+      "vehicle_id": "demo-vehicle-0000043113",
+      "policy_number": "0000043113",
+      "receipt_number": "0000043113",
+      "start_date": "2026-03-09",
+      "end_date": "2027-03-09",
+      "emission_date": "2026-03-09",
+      "premium_amount": 15.0,
+      "currency": "EUR",
+      "payment_type": "CONTADO",
+      "advisor": "OFICINA PRINCIPAL",
+      "supervisor": "GERENCIA GENERAL",
+      "pdf_url": "/api/rcv/0000043113/pdf",
+      "qr_url": "/rcv/0000043113",
+      "email_sent": true,
+      "status": "active",
+      "created_at": "2026-03-09T12:00:00.000Z",
+      "updated_at": "2026-03-09T12:00:00.000Z"
+    }
+  ],
+  "coverages": [
+    {
+      "id": "cov-1",
+      "policy_id": "0000043113",
+      "coverage_type": "RC_COSAS",
+      "coverage_amount": 2000.0,
+      "included": true
+    },
+    {
+      "id": "cov-2",
+      "policy_id": "0000043113",
+      "coverage_type": "RC_PERSONAS",
+      "coverage_amount": 2505.0,
+      "included": true
+    },
+    {
+      "id": "cov-3",
+      "policy_id": "0000043113",
+      "coverage_type": "EXCESO_GARANTIA",
+      "coverage_amount": 250.0,
+      "included": true
+    },
+    {
+      "id": "cov-4",
+      "policy_id": "0000043113",
+      "coverage_type": "ASISTENCIA_JURIDICA",
+      "coverage_amount": 250.0,
+      "included": true
+    },
+    {
+      "id": "cov-5",
+      "policy_id": "0000043113",
+      "coverage_type": "MUERTE_CONDUCTOR",
+      "coverage_amount": 500.0,
+      "included": true
+    },
+    {
+      "id": "cov-6",
+      "policy_id": "0000043113",
+      "coverage_type": "INVALIDEZ_CONDUCTOR",
+      "coverage_amount": 0,
+      "included": true
+    },
+    {
+      "id": "cov-7",
+      "policy_id": "0000043113",
+      "coverage_type": "GASTOS_MEDICOS",
+      "coverage_amount": 0,
+      "included": true
+    },
+    {
+      "id": "cov-8",
+      "policy_id": "0000043113",
+      "coverage_type": "GASTOS_FUNERARIOS",
+      "coverage_amount": 0,
+      "included": true
+    }
+  ]
+}
