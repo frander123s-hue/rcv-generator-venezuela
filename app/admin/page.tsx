@@ -71,7 +71,7 @@ export default async function AdminDashboardPage() {
             Control central de clientes, pólizas RCV emitidas, códigos QR y envíos de correo
           </p>
         </div>
-        <div>
+        <div className="flex flex-wrap items-center gap-2">
           <span
             className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
               supabaseActive
@@ -81,6 +81,15 @@ export default async function AdminDashboardPage() {
           >
             {supabaseActive ? '🟢 Conectado a Supabase Cloud' : '🟡 Modo Local Activo'}
           </span>
+          <a
+            href="/api/cron/keep-alive"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors"
+            title="Tarea programada activa para mantener Supabase y Vercel encendidos 24/7"
+          >
+            ⚡ Keep-Alive 24/7 Activo
+          </a>
         </div>
       </div>
 
