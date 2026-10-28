@@ -110,18 +110,18 @@ CREATE POLICY "Public read vehicles" ON vehicles FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Public read coverages" ON coverages;
 CREATE POLICY "Public read coverages" ON coverages FOR SELECT USING (true);
 
--- Acceso completo para administrador autenticado y service_role
+-- Acceso completo para la aplicación
 DROP POLICY IF EXISTS "Admin full access clients" ON clients;
-CREATE POLICY "Admin full access clients" ON clients FOR ALL USING (auth.role() IN ('authenticated', 'service_role'));
+CREATE POLICY "Admin full access clients" ON clients FOR ALL USING (true) WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Admin full access vehicles" ON vehicles;
-CREATE POLICY "Admin full access vehicles" ON vehicles FOR ALL USING (auth.role() IN ('authenticated', 'service_role'));
+CREATE POLICY "Admin full access vehicles" ON vehicles FOR ALL USING (true) WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Admin full access policies" ON policies;
-CREATE POLICY "Admin full access policies" ON policies FOR ALL USING (auth.role() IN ('authenticated', 'service_role'));
+CREATE POLICY "Admin full access policies" ON policies FOR ALL USING (true) WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Admin full access coverages" ON coverages;
-CREATE POLICY "Admin full access coverages" ON coverages FOR ALL USING (auth.role() IN ('authenticated', 'service_role'));
+CREATE POLICY "Admin full access coverages" ON coverages FOR ALL USING (true) WITH CHECK (true);
 
 -- ============================================================
 -- STORAGE BUCKETS (FOTOS DE CLIENTES Y PDFS DE PÓLIZAS)

@@ -215,11 +215,15 @@ export async function getPolicyById(id: string): Promise<PolicyWithDetails | nul
   if (isSupabaseConfigured()) {
     try {
       const supabase = await createAdminClient()
-      const { data, error } = await supabase
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+      const query = supabase
         .from('policies')
         .select('*, clients(*), vehicles(*), coverages(*)')
-        .eq('id', id)
-        .maybeSingle()
+
+      const { data, error } = isUuid
+        ? await query.eq('id', id).maybeSingle()
+        : await query.eq('policy_number', id).maybeSingle()
+
       if (!error && data) return data as PolicyWithDetails
     } catch {}
   }
