@@ -14,9 +14,15 @@ const sym = (c: string) => (c === 'EUR' ? '€' : c === 'USD' ? '$' : 'Bs.')
 
 function SummaryRow({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
   return (
-    <div className="flex justify-between items-start py-1.5 border-b border-gray-100 last:border-0">
-      <span className="text-sm text-gray-500 flex-shrink-0 w-40">{label}</span>
-      <span className={`text-sm text-right ${bold ? 'font-bold text-gray-900' : 'text-gray-700'}`}>{value}</span>
+    <div className="flex justify-between items-start gap-2 py-1.5 border-b border-gray-100 last:border-0">
+      <span className="text-xs sm:text-sm text-gray-500 flex-shrink-0 w-24 sm:w-36">{label}</span>
+      <span
+        className={`text-xs sm:text-sm text-right break-all sm:break-words ${
+          bold ? 'font-bold text-gray-900' : 'text-gray-700'
+        }`}
+      >
+        {value}
+      </span>
     </div>
   )
 }
@@ -35,15 +41,21 @@ export default function Step5Preview({ formData, onPrev, onSubmit, isSubmitting,
 
   return (
     <div>
-      <div className="bg-[#1a2e5a] px-6 py-4 flex items-center gap-3">
-        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-sm">5</div>
+      <div className="bg-[#1a2e5a] px-4 sm:px-6 py-3.5 sm:py-4 flex items-center gap-2.5 sm:gap-3">
+        <div className="w-7 h-7 sm:w-8 sm:h-8 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm flex-shrink-0">
+          5
+        </div>
         <div>
-          <h2 className="text-white font-semibold">Confirmar y Generar Póliza</h2>
-          <p className="text-blue-300 text-xs">Revisa todos los datos antes de generar el PDF</p>
+          <h2 className="text-white font-semibold text-sm sm:text-base">
+            Confirmar y Generar Póliza
+          </h2>
+          <p className="text-blue-300 text-[11px] sm:text-xs">
+            Revisa todos los datos antes de generar el PDF
+          </p>
         </div>
       </div>
 
-      <div className="p-6 space-y-5">
+      <div className="p-4 sm:p-6 space-y-5">
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-2">
             <span className="text-red-500">❌</span>
@@ -152,18 +164,18 @@ export default function Step5Preview({ formData, onPrev, onSubmit, isSubmitting,
         </div>
 
         {/* Navigation */}
-        <div className="flex justify-between pt-4 border-t border-gray-100">
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-2.5 pt-4 border-t border-gray-100">
           <button
             onClick={onPrev}
             disabled={isSubmitting}
-            className="bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-gray-700 px-6 py-2.5 rounded-lg font-medium transition-colors"
+            className="w-full sm:w-auto bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-gray-700 px-6 py-2.5 rounded-lg font-medium transition-colors"
           >
             ← Anterior
           </button>
           <button
             onClick={onSubmit}
             disabled={isSubmitting}
-            className="bg-green-600 hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed text-white px-8 py-2.5 rounded-lg font-bold transition-colors flex items-center gap-2 shadow-lg"
+            className="w-full sm:w-auto justify-center bg-green-600 hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed text-white px-6 sm:px-8 py-3 sm:py-2.5 rounded-lg font-bold transition-colors flex items-center gap-2 shadow-lg"
           >
             {isSubmitting ? (
               <>

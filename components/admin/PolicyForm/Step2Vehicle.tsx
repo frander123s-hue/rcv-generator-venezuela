@@ -85,19 +85,21 @@ export default function Step2Vehicle({ formData, updateFormData, onNext, onPrev 
 
   return (
     <div>
-      <div className="bg-[#1a2e5a] px-6 py-4 flex items-center gap-3">
-        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-sm">
+      <div className="bg-[#1a2e5a] px-4 sm:px-6 py-3.5 sm:py-4 flex items-center gap-2.5 sm:gap-3">
+        <div className="w-7 h-7 sm:w-8 sm:h-8 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm flex-shrink-0">
           2
         </div>
         <div>
-          <h2 className="text-white font-semibold">Módulo 2: Filtración y Datos del Vehículo</h2>
-          <p className="text-blue-300 text-xs">
+          <h2 className="text-white font-semibold text-sm sm:text-base">
+            Módulo 2: Filtración y Datos del Vehículo
+          </h2>
+          <p className="text-blue-300 text-[11px] sm:text-xs">
             Selecciona la Clase para pre-filtrar capacidades o busca directamente por Placa
           </p>
         </div>
       </div>
 
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {lookupMsg && (
           <div className="mb-4 bg-blue-50 border border-blue-200 text-blue-800 px-4 py-2 rounded-lg text-xs font-medium">
             {lookupMsg}
@@ -281,18 +283,18 @@ export default function Step2Vehicle({ formData, updateFormData, onNext, onPrev 
           </div>
         </div>
 
-        <div className="flex justify-between mt-6 pt-4 border-t border-gray-100">
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-2.5 mt-6 pt-4 border-t border-gray-100">
           <button
             type="button"
             onClick={onPrev}
-            className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg font-medium transition-colors"
+            className="w-full sm:w-auto bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg font-medium transition-colors"
           >
             ← Anterior
           </button>
           <button
             type="button"
             onClick={handleNext}
-            className="bg-[#1a2e5a] hover:bg-[#0f1e3d] text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
+            className="w-full sm:w-auto bg-[#1a2e5a] hover:bg-[#0f1e3d] text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
           >
             Siguiente: Módulo Contrato →
           </button>

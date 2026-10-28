@@ -52,14 +52,14 @@ export default function PoliciesFilterTable({ initialPolicies }: { initialPolici
   return (
     <div className="space-y-4">
       {feedback && (
-        <div className="bg-blue-50 border border-blue-200 text-blue-900 px-4 py-3 rounded-xl text-sm font-medium">
+        <div className="bg-blue-50 border border-blue-200 text-blue-900 px-4 py-3 rounded-xl text-xs sm:text-sm font-medium">
           {feedback}
         </div>
       )}
 
       {/* Barra de Filtración */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 grid grid-cols-1 md:grid-cols-4 gap-3">
-        <div className="md:col-span-2">
+      <div className="bg-white rounded-xl border border-gray-200 p-3.5 sm:p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="sm:col-span-2">
           <label className="block text-xs text-gray-500 font-medium mb-1">
             Buscar por Placa, Cédula/RIF, Beneficiario o Contrato Nro.
           </label>
@@ -67,7 +67,7 @@ export default function PoliciesFilterTable({ initialPolicies }: { initialPolici
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Ej: AE6Y92E, 30629617, MELVIN, 0000043114..."
+            placeholder="Ej: AI7I16T, 26956521, MARVIN, 0000043117..."
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1a2e5a] text-gray-900"
           />
         </div>
@@ -106,8 +106,97 @@ export default function PoliciesFilterTable({ initialPolicies }: { initialPolici
         </div>
       </div>
 
-      {/* Tabla */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      {/* Vista Móvil en Tarjetas (< md) */}
+      <div className="md:hidden space-y-3">
+        {filtered.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-400 text-sm">
+            No se encontraron pólizas con los filtros seleccionados.
+          </div>
+        ) : (
+          filtered.map((policy) => (
+            <div
+              key={policy.id}
+              className="bg-white rounded-xl border border-gray-200 p-4 space-y-3 shadow-sm"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <span className="font-mono text-xs text-blue-700 font-bold bg-blue-50 px-2.5 py-1 rounded border border-blue-200">
+                    N° {policy.policy_number}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${
+                      policy.is_active
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'
+                    }`}
+                  >
+                    {policy.is_active ? '✅ Vigente' : '❌ Vencida'}
+                  </span>
+                  <span className="font-bold text-[#1a2e5a] text-sm">
+                    {policy.currency === 'EUR' ? '€' : policy.currency === 'USD' ? '$' : 'Bs.'}
+                    {Number(policy.premium_amount).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <p className="font-semibold text-gray-900 text-sm">{policy.clients?.full_name}</p>
+                <p className="text-xs text-gray-500">
+                  {policy.clients?.cedula_rif}
+                  {policy.clients?.email ? ` · ${policy.clients.email}` : ''}
+                </p>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-2.5 text-xs flex items-center justify-between">
+                <div>
+                  <span className="font-mono font-bold text-gray-900 bg-white px-2 py-0.5 rounded border border-gray-200">
+                    {policy.vehicles?.plate}
+                  </span>{' '}
+                  <span className="text-gray-600">
+                    {policy.vehicles?.brand} {policy.vehicles?.model} ({policy.vehicles?.year})
+                  </span>
+                </div>
+                <div className="text-right text-[11px] text-gray-500">
+                  <div>{policy.start_date}</div>
+                  <div className="font-semibold text-gray-700">→ {policy.end_date}</div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 pt-1">
+                <a
+                  href={`/api/rcv/${policy.id}/pdf`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex-1 text-center text-xs bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-lg font-semibold"
+                >
+                  📄 PDF
+                </a>
+                <Link
+                  href={`/rcv/${policy.id}`}
+                  target="_blank"
+                  className="flex-1 text-center text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-lg font-semibold"
+                >
+                  📱 QR
+                </Link>
+                {policy.clients?.email && (
+                  <button
+                    onClick={() => handleResendEmail(policy.id)}
+                    disabled={sendingId === policy.id}
+                    className="flex-1 text-center text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 px-3 py-2 rounded-lg font-semibold disabled:opacity-50"
+                  >
+                    {sendingId === policy.id ? 'Enviando...' : '📧 Correo'}
+                  </button>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Tabla para Escritorio (>= md) */}
+      <div className="hidden md:block bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

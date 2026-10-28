@@ -237,22 +237,24 @@ export default function NuevaPolizaPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Generador de Póliza RCV por Módulos</h1>
-        <p className="text-gray-500 text-sm mt-1">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+          Generador de Póliza RCV por Módulos
+        </h1>
+        <p className="text-gray-500 text-xs sm:text-sm mt-1">
           Filtra o llena cada módulo con el dato necesario para emitir el PDF oficial con QR y foto del asegurado
         </p>
       </div>
 
       {/* Stepper */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+      <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4 mb-4 sm:mb-6">
         <div className="flex items-center">
           {steps.map((step, idx) => (
-            <div key={step.id} className="flex items-center flex-1">
+            <div key={step.id} className="flex items-center flex-1 last:flex-initial">
               <div className="flex flex-col items-center">
                 <button
                   onClick={() => setCurrentStep(step.id)}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold transition-all ${
                     currentStep === step.id
                       ? 'bg-[#1a2e5a] text-white shadow-lg scale-110'
                       : currentStep > step.id
@@ -276,7 +278,7 @@ export default function NuevaPolizaPage() {
               </div>
               {idx < steps.length - 1 && (
                 <div
-                  className={`flex-1 h-1 mx-2 rounded ${
+                  className={`flex-1 h-1 mx-1.5 sm:mx-2 rounded ${
                     currentStep > step.id ? 'bg-green-400' : 'bg-gray-200'
                   }`}
                 />
@@ -284,6 +286,9 @@ export default function NuevaPolizaPage() {
             </div>
           ))}
         </div>
+        <p className="sm:hidden text-center text-xs font-bold text-[#1a2e5a] mt-2.5 pt-2 border-t border-gray-100">
+          {steps.find((s) => s.id === currentStep)?.label} ({currentStep}/5)
+        </p>
       </div>
 
       {/* Step Content */}

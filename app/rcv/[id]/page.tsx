@@ -43,17 +43,17 @@ export default async function RCVPublicPage(context: {
   const isActive = policy.end_date >= today
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0f1e3d] to-[#1a3a6e] py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#0f1e3d] to-[#1a3a6e] py-4 px-3 sm:py-8 sm:px-4">
       <div className="max-w-2xl mx-auto">
         <div className="bg-white rounded-2xl overflow-hidden shadow-2xl">
           {/* Header */}
-          <div className="bg-[#1a2e5a] px-6 py-5 text-center">
-            <div className="flex items-center justify-center gap-3 mb-2">
-              <div className="w-12 h-12 bg-[#c8a619] rounded-full flex items-center justify-center text-2xl">
+          <div className="bg-[#1a2e5a] px-4 sm:px-6 py-4 sm:py-5 text-center">
+            <div className="flex items-center justify-center gap-3 mb-1 sm:mb-2">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#c8a619] rounded-full flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">
                 🛡️
               </div>
-              <div className="text-left">
-                <h1 className="text-white font-bold text-base sm:text-lg leading-tight">
+              <div className="text-left min-w-0">
+                <h1 className="text-white font-bold text-sm sm:text-lg leading-tight">
                   {COMPANY_CONFIG.name}
                 </h1>
                 <p className="text-[#c8a619] text-xs sm:text-sm font-semibold">
@@ -64,8 +64,8 @@ export default async function RCVPublicPage(context: {
           </div>
 
           {/* Status Banner */}
-          <div className={`px-6 py-3 text-center ${isActive ? 'bg-green-600' : 'bg-red-600'}`}>
-            <p className="text-white font-bold text-base">
+          <div className={`px-4 sm:px-6 py-3 text-center ${isActive ? 'bg-green-600' : 'bg-red-600'}`}>
+            <p className="text-white font-bold text-sm sm:text-base">
               {isActive ? '✅ PÓLIZA RCV VIGENTE Y VERIFICADA' : '❌ PÓLIZA RCV VENCIDA'}
             </p>
             <p className="text-white/90 text-xs mt-0.5">
@@ -73,7 +73,7 @@ export default async function RCVPublicPage(context: {
             </p>
           </div>
 
-          <div className="p-6 space-y-6">
+          <div className="p-4 sm:p-6 space-y-5 sm:space-y-6">
             {/* Datos del Cliente + Foto */}
             <div>
               <h2 className="text-xs font-bold uppercase tracking-wider text-[#1a2e5a] border-b border-gray-200 pb-2 mb-3">
@@ -159,7 +159,7 @@ export default async function RCVPublicPage(context: {
             </div>
 
             {/* Vigencia */}
-            <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 text-center">
               <div className="bg-gray-50 rounded-lg p-3">
                 <p className="text-xs text-gray-400 uppercase">Emisión</p>
                 <p className="text-sm font-bold text-gray-900">{formatDate(policy.emission_date)}</p>

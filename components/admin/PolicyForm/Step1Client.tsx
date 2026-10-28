@@ -93,14 +93,16 @@ export default function Step1Client({ formData, updateFormData, onNext }: StepPr
 
   return (
     <div>
-      <div className="bg-[#1a2e5a] px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-sm">
+      <div className="bg-[#1a2e5a] px-4 sm:px-6 py-3.5 sm:py-4 flex flex-wrap items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm flex-shrink-0">
             1
           </div>
           <div>
-            <h2 className="text-white font-semibold">Módulo 1: Filtración y Datos del Cliente</h2>
-            <p className="text-blue-300 text-xs">
+            <h2 className="text-white font-semibold text-sm sm:text-base">
+              Módulo 1: Filtración y Datos del Cliente
+            </h2>
+            <p className="text-blue-300 text-[11px] sm:text-xs">
               Busca por Cédula/RIF o registra al beneficiario con su fotografía para el PDF
             </p>
           </div>
@@ -108,28 +110,29 @@ export default function Step1Client({ formData, updateFormData, onNext }: StepPr
         <button
           type="button"
           onClick={loadSampleData}
-          className="text-xs bg-[#c8a619] hover:bg-[#b09115] text-white font-semibold px-3 py-1.5 rounded-lg transition-colors"
+          className="text-xs bg-[#c8a619] hover:bg-[#b09115] text-white font-semibold px-3 py-1.5 rounded-lg transition-colors w-full sm:w-auto text-center"
         >
           ⚡ Autocompletar Ejemplo del PDF
         </button>
       </div>
 
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {lookupMsg && (
           <div className="mb-4 bg-blue-50 border border-blue-200 text-blue-800 px-4 py-2.5 rounded-lg text-xs font-medium">
             {lookupMsg}
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
           {/* Foto del Cliente */}
           <div className="lg:col-span-1">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Foto del Cliente <span className="text-blue-600 text-xs">(Aparece en Póliza y Carnet)</span>
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-center lg:text-left">
+              Foto del Cliente{' '}
+              <span className="text-blue-600 text-xs">(Esquina superior derecha del PDF)</span>
             </label>
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="cursor-pointer border-2 border-dashed border-gray-300 hover:border-[#1a2e5a] rounded-xl overflow-hidden transition-colors bg-gray-50 hover:bg-blue-50 flex items-center justify-center"
+              className="cursor-pointer border-2 border-dashed border-gray-300 hover:border-[#1a2e5a] rounded-xl overflow-hidden transition-colors bg-gray-50 hover:bg-blue-50 flex items-center justify-center max-w-[140px] sm:max-w-[180px] lg:max-w-none mx-auto"
               style={{ aspectRatio: '3/4' }}
             >
               {formData.photo_preview ? (
@@ -139,10 +142,12 @@ export default function Step1Client({ formData, updateFormData, onNext }: StepPr
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="text-center p-4">
-                  <div className="text-4xl mb-2">📷</div>
-                  <p className="text-gray-700 text-sm font-semibold">Subir Foto del Cliente</p>
-                  <p className="text-gray-400 text-xs mt-1">JPG o PNG tipo carnet</p>
+                <div className="text-center p-3 sm:p-4">
+                  <div className="text-3xl sm:text-4xl mb-1 sm:mb-2">📷</div>
+                  <p className="text-gray-700 text-xs sm:text-sm font-semibold">
+                    Subir Foto del Cliente
+                  </p>
+                  <p className="text-gray-400 text-[11px] sm:text-xs mt-1">JPG o PNG tipo carnet</p>
                 </div>
               )}
             </div>
@@ -174,7 +179,7 @@ export default function Step1Client({ formData, updateFormData, onNext }: StepPr
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 C.I / RIF del Beneficiario <span className="text-red-500">*</span>
               </label>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap sm:flex-nowrap gap-2">
                 <select
                   value={formData.cedula_prefix}
                   onChange={(e) => updateFormData({ cedula_prefix: e.target.value })}
@@ -191,13 +196,13 @@ export default function Step1Client({ formData, updateFormData, onNext }: StepPr
                   value={formData.cedula_rif}
                   onChange={(e) => updateFormData({ cedula_rif: e.target.value.replace(/\D/g, '') })}
                   placeholder="30629617"
-                  className="flex-1 px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1a2e5a] text-sm text-gray-900 font-mono"
+                  className="flex-1 min-w-[130px] px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1a2e5a] text-sm text-gray-900 font-mono"
                 />
                 <button
                   type="button"
                   onClick={handleFilterByCedula}
                   disabled={searching}
-                  className="bg-blue-50 hover:bg-blue-100 text-[#1a2e5a] border border-blue-200 px-4 py-2.5 rounded-lg text-xs font-semibold transition-colors"
+                  className="w-full sm:w-auto bg-blue-50 hover:bg-blue-100 text-[#1a2e5a] border border-blue-200 px-4 py-2.5 rounded-lg text-xs font-semibold transition-colors"
                 >
                   {searching ? 'Buscando...' : '🔍 Filtrar Cliente'}
                 </button>
@@ -265,7 +270,7 @@ export default function Step1Client({ formData, updateFormData, onNext }: StepPr
           <button
             type="button"
             onClick={handleNext}
-            className="bg-[#1a2e5a] hover:bg-[#0f1e3d] text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
+            className="w-full sm:w-auto bg-[#1a2e5a] hover:bg-[#0f1e3d] text-white px-6 py-3 sm:py-2.5 rounded-lg font-medium transition-colors"
           >
             Siguiente: Módulo Vehículo →
           </button>
